@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "msedge",
+            "name": "https://kidsecure.app/invalidSessionData",
+            "request": "launch",
+            "url": "https://kidsecure.app/invalidSessionData"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Assertion Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*"
+  },
+  {
+    "name": "Timeout Errors",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Timeout.*"
+  },
+  {
+    "name": "Element Not Found Errors",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*not found.*|.*NoSuchElement.*"
+  },
+  {
+    "name": "Network or API Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*network.*|.*API.*|.*fetch.*"
+  },
+  {
+    "name": "Broken Test or Setup Issues",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Other Failures",
+    "matchedStatuses": ["failed", "broken"]
+  }
+]
