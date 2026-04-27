@@ -1,0 +1,17 @@
+# .github/workflows/test.yml
+name: — Playwright Tests
+on:
+workflow_dispatch: # Allows manual + API trigger
+jobs:
+test:
+runs-on: ubuntu-latest
+steps:- uses: actions/checkout@v3- uses: actions/setup-python@v4
+with:
+python-version: '3.11'- name: Install dependencies
+run: pip install -r requirements.txt- name: Install Playwright browsers
+run: playwright install --with-deps chromium- name: Run Playwright tests
+run: pytest --html=report.html --self-contained-html -v- name: Upload HTML Report
+uses: actions/upload-artifact@v4
+with:
+name: -test-report
+path: report.htm
