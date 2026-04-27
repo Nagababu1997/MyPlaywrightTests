@@ -21,6 +21,7 @@ test.describe.serial('KidSecure Web Automation', () => {
   // test.beforeAll(async () => {
   //   // Launch browser once
   //   browser = await chromium.launch({ headless: false });
+
   //   context = await browser.newContext();
   //   recordVideo: {dir:'test-results/videos'};
   //   page = await context.newPage();
@@ -33,8 +34,9 @@ test.describe.serial('KidSecure Web Automation', () => {
   // });
 
   test.beforeAll(async () => {
-    browser = await chromium.launch({ headless: false });
-
+    browser = await chromium.launch({
+      headless: process.env.CI ? true : false
+    });
     context = await browser.newContext({
       permissions: [], // deny geolocation
     });
@@ -52,13 +54,13 @@ test.describe.serial('KidSecure Web Automation', () => {
 
   test('Step 01: Verify Home Page and click on Parent Login', async () => {
     await kidsecure.verifyAppFeatures();
-    
+
     await kidsecure.clickFeatures();
     await kidsecure.verifyMoreFeatures();
     await kidsecure.verifyPricing();
-    await kidsecure.verifyHowItWorks(); 
+    await kidsecure.verifyHowItWorks();
     await kidsecure.verifyFAQs();
-   
+
     // Store newPage for next tests
     // FIRST get the new FAQ page
     const faqPage = await kidsecure.clickMoreFAQs(context);
@@ -96,7 +98,7 @@ test.describe.serial('KidSecure Web Automation', () => {
 
 
   });
-  
+
   test('Step 03: Enter invalid Email ID and valid PIN, and verify the toast message', async () => {
     await loginPage.LoginWithInvalidEmailID(InvalidData.username, InvalidData.password);
 
@@ -128,7 +130,7 @@ test.describe.serial('KidSecure Web Automation', () => {
     await layout.notifications();
     // await layout.profileSettings();
   });
-  test('Step 08: Verify Swap Kid functionality', async ()=>{
+  test('Step 08: Verify Swap Kid functionality', async () => {
     await layout.swapKids()
   })
   test('Step 09: Verify Allowed Apps count', async () => {
@@ -171,7 +173,7 @@ test.describe.serial('KidSecure Web Automation', () => {
   test('Step 18: Verify Feedback section', async () => {
     await layout.Feedback();
   });
-  test('Step 19: Verify Account Settings section', async()=>{
+  test('Step 19: Verify Account Settings section', async () => {
     await layout.profileTable()
   })
 
@@ -191,7 +193,9 @@ test.describe.serial('KidSecure Web Automation', () => {
   // });
 
   test.afterAll(async () => {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   });
 
 });
