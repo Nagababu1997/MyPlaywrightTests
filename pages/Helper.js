@@ -12,8 +12,13 @@ class Helper {
     async waitForElement(element, description) {
         await allure.step(`${description}`, async () => {
             try {
-                await element.waitForSelector({ state: 'visible', timeout: 5000 });
-                await expect(element).toBeVisible({ timeout: 5000 });
+                const el = element.first();
+
+                await el.page().waitForLoadState('domcontentloaded');
+                await el.scrollIntoViewIfNeeded();
+                await el.waitFor({ state: 'visible', timeout: 15000 });
+                await expect(el).toBeVisible({ timeout: 15000 }); 
+                // await expect(element).toBeVisible({ timeout: 5000 });
             } catch (error) {
                 // Capture full-page screenshot if element not visible
                 const screenshot = await element.page().screenshot();
@@ -116,39 +121,63 @@ class Helper {
             }
         });
     }
-   async click(element) {
-    try {
-        await element.waitFor({ state: 'visible', timeout: 5000 });
-        await element.click();
+    async click(element) {
+        try {
+            await element.waitFor({ state: 'visible', timeout: 5000 });
+            await element.click();
 
-    } catch (error) {
-        const screenshot = await element.page().screenshot();
+        } catch (error) {
+            const screenshot = await element.page().screenshot();
 
-        await allure.attachment(`Screenshot - Click Failed`, screenshot, 'image/png');
+            await allure.attachment(`Screenshot - Click Failed`, screenshot, 'image/png');
 
-        throw new Error(`Click action failed. Reason: ${error.message}`);
+            throw new Error(`Click action failed. Reason: ${error.message}`);
+        }
     }
-}
     async clickElement(element, description) {
         await allure.step(`Click ${description}`, async () => {
             try {
-                // Ensure element is visible and enabled before clicking
-                await element.waitFor({ state: 'visible', timeout: 5000 });
-                await element.click();
+                const el = element.first(); // ✅ handles multiple matches
+
+                await el.page().waitForLoadState('domcontentloaded'); // ✅ sync
+
+                await el.scrollIntoViewIfNeeded(); // ✅ important for CI
+
+                await el.waitFor({ state: 'visible', timeout: 15000 }); // ✅ increase timeout
+
+                await el.click({ timeout: 10000 });
 
             } catch (error) {
-                // Capture full-page screenshot for debugging
-                const screenshot = await element.page().screenshot();
+                const screenshot = await element.page().screenshot({ fullPage: true });
 
-                // Attach screenshot to Allure report
                 await allure.attachment(`Screenshot - ${description}`, screenshot, 'image/png');
 
-                // Throw a clear, helpful error
                 throw new Error(`Failed to click on ${description}. Reason: ${error.message}`);
             }
         });
     }
-     async clickElement1(element, description) {
+    /*
+        async clickElement(element, description) {
+            await allure.step(`Click ${description}`, async () => {
+                try {
+                    // Ensure element is visible and enabled before clicking
+                    await element.waitFor({ state: 'visible', timeout: 5000 });
+                    await element.click();
+    
+                } catch (error) {
+                    // Capture full-page screenshot for debugging
+                    const screenshot = await element.page().screenshot();
+    
+                    // Attach screenshot to Allure report
+                    await allure.attachment(`Screenshot - ${description}`, screenshot, 'image/png');
+    
+                    // Throw a clear, helpful error
+                    throw new Error(`Failed to click on ${description}. Reason: ${error.message}`);
+                }
+            });
+        }
+            */
+    async clickElement1(element, description) {
         await allure.step(`${description}`, async () => {
             try {
                 // Ensure element is visible and enabled before clicking
@@ -170,19 +199,19 @@ class Helper {
     async clickEnter(element, description = 'Search Field') {
 
         await allure.step(`Press Enter on ${description}`, async () => {
-        try {
-            await element.waitFor({ state: 'visible', timeout: 5000 });
-            await element.press('Enter');
+            try {
+                await element.waitFor({ state: 'visible', timeout: 5000 });
+                await element.press('Enter');
 
-        } catch (error) {
+            } catch (error) {
 
-            const screenshot = await element.page().screenshot();
-            await allure.attachment(`Screenshot - ${description}`, screenshot, 'image/png');
+                const screenshot = await element.page().screenshot();
+                await allure.attachment(`Screenshot - ${description}`, screenshot, 'image/png');
 
-            throw new Error(`Failed to press Enter on ${description}. Reason: ${error.message}`);
-        }
-    });
-       
+                throw new Error(`Failed to press Enter on ${description}. Reason: ${error.message}`);
+            }
+        });
+
     }
     async verifyDropdownOptionExists(dropdown, optionText) {
         await allure.step(`Verify dropdown option "${optionText}" is present`, async () => {
@@ -212,37 +241,37 @@ class Helper {
 
     async switchKid(page, name) {
 
-    await allure.step(`Switch to kid '${name}'`, async () => {
+        await allure.step(`Switch to kid '${name}'`, async () => {
 
-        try {
-            const menu = page.locator("#dropdownMenuButton1");
+            try {
+                const menu = page.locator("#dropdownMenuButton1");
 
-            await menu.waitFor({ state: 'visible' });
-            await menu.click();
+                await menu.waitFor({ state: 'visible' });
+                await menu.click();
 
-            const dropdown = page.locator("//ul[contains(@class,'show')]");
-            await dropdown.waitFor({ state: 'visible' });
+                const dropdown = page.locator("//ul[contains(@class,'show')]");
+                await dropdown.waitFor({ state: 'visible' });
 
-            // ✅ Scoped locator (FIXED)
-            // const kid = dropdown.getByText(name, { exact: true });
-            const kid = dropdown.locator(`text=${name}`).first();
-            // const kid = dropdown.locator(`.//a[normalize-space()='${name}']`);
+                // ✅ Scoped locator (FIXED)
+                // const kid = dropdown.getByText(name, { exact: true });
+                const kid = dropdown.locator(`text=${name}`).first();
+                // const kid = dropdown.locator(`.//a[normalize-space()='${name}']`);
 
-            // console.log(await page.locator(`text=${name}`).count());
+                // console.log(await page.locator(`text=${name}`).count());
 
-            await kid.waitFor({ state: 'visible' });
-            await kid.click();
+                await kid.waitFor({ state: 'visible' });
+                await kid.click();
 
-            await page.waitForLoadState('networkidle');
+                await page.waitForLoadState('networkidle');
 
-        } catch (error) {
-            const screenshot = await page.screenshot();
-            await allure.attachment(`Switch Kid Failed (${name})`, screenshot, 'image/png');
+            } catch (error) {
+                const screenshot = await page.screenshot();
+                await allure.attachment(`Switch Kid Failed (${name})`, screenshot, 'image/png');
 
-            throw error;
-        }
-    });
-}
+                throw error;
+            }
+        });
+    }
     async sendKeys(element, sendElements, description) {
         await allure.step(`Enter ${description}`, async () => {
             try {
